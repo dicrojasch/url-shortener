@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  web:
+    build: ./app
+    ports:
+      - '5000:5000'
+    environment:
+      - FLASK_APP=app
+      - FLASK_ENV=development
+      - TYPE_DEPLOY=development_docker
+    container_name: web
+    depends_on:
+      - dynamodb-local
+      - zookeeper
+  dynamodb-local:
+    image: amazon/dynamodb-local:1.18.0
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    command: -jar DynamoDBLocal.jar -sharedDb
+#    network_mode: host
+  kafka:
+    image: 'bitnami/kafka:2.8.1'
+    container_name: kafka-local
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+  zookeeper:
+    image: zookeeper:3.7.0
+    container_name: zookeeper-local
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
