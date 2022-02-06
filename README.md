@@ -1,4 +1,6 @@
-# How to run
+# url-shortener
+
+## How to run
 
 This application run on 5 Docker containers:
 - Main app (API Rest)
@@ -10,7 +12,7 @@ This application run on 5 Docker containers:
 These applications are orquestadas by docker-compose. To run clone this repository, install docker and docker-compose finally use command in root folder of the repository
 `docker-compose build` and `docker-compose up`
 
-# Endpoints:
+## Endpoints:
 ### Get an URL save
 - URL -> http://localhost:5000/<code>
 - METHOD -> GET
@@ -35,7 +37,7 @@ These applications are orquestadas by docker-compose. To run clone this reposito
 - ERROR RESPONSE ->  204 Error if not content found, 500 if internal error
 - SAMPLE CALL -> http://localhost:5000/api/v1/delete/3bj7   
    
-# Data Model
+## Data Model
 The database model consist in two tables:
 - link
 - log_internal
