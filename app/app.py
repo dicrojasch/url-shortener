@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, redirect, request, abort
+from flask import Flask, redirect, request, abort, jsonify
 from app.services.models import URLShortener
 from app.services.zookeeper import ZookeeperURL
 from app import create_app
@@ -17,7 +17,7 @@ def get_large_link(short_link):
     return redirect(stored_link.long_link, code=302)
 
 
-@app.route("/", methods=['POST'])
+@app.route("/api/v1/create", methods=['POST'])
 def get_short_link():
     link = request.form['link']
     if not validators.url(link):
@@ -32,6 +32,19 @@ def get_short_link():
 
     link = URLShortener(index_link=short_link, long_link=link, creation_date=datetime.now())
     link.save()
+    response = {'short-link': request.url_root + short_link}
+    return jsonify(response)
 
-    return "<p>" + request.url_root + short_link + "</p>"
+
+@app.route("/api/v1/delete/<short_link>", methods=['DELETE'])
+def delete_link(short_link):
+    stored_link = URLShortener.get(short_link)
+    stored_link.delete()
+    response = {'message': 'success'}
+    return jsonify(response)
+
+
+@app.route("/test")
+def test():
+    return jsonify({'message': 'enpoint for testing'})
 
