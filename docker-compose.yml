@@ -11,15 +11,22 @@ services:
       - TYPE_DEPLOY=development_docker
     container_name: web
     depends_on:
-      - dynamodb-local
-      - zookeeper
+      kafka:
+        condition: service_healthy
+  log_app:
+    build: ./log_app
+    environment:
+      - TYPE_DEPLOY=development_docker
+    container_name: log_app
+    depends_on:
+      kafka:
+        condition: service_healthy
   dynamodb-local:
     image: amazon/dynamodb-local:1.18.0
     container_name: dynamodb-local
     ports:
       - "8000:8000"
     command: -jar DynamoDBLocal.jar -sharedDb
-#    network_mode: host
   kafka:
     image: 'bitnami/kafka:2.8.1'
     container_name: kafka-local
@@ -27,11 +34,18 @@ services:
       - zookeeper
     ports:
       - "29092:29092"
+      - "9092:9092"
     environment:
       - KAFKA_BROKER_ID=1
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - ALLOW_PLAINTEXT_LISTENER=yes
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181" ]
+      interval: 30s
+      timeout: 10s
+      retries: 4
   zookeeper:
     image: zookeeper:3.7.0
     container_name: zookeeper-local
