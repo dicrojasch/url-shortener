@@ -15,7 +15,7 @@ app = init_app()
 def get_large_link(short_link):
     stored_link = URLShortener.get(short_link)
     kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
-    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_GET, short_link, stored_link, constants.CLIENT_FREE)
+    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_GET, short_link, stored_link.long_link, constants.CLIENT_FREE)
     return redirect(stored_link.long_link, code=302)
 
 
@@ -54,7 +54,7 @@ def delete_link(short_link):
     return jsonify(response)
 
 
-@app.route("/test")
+@app.route("/api/v1/test")
 def test():
     return jsonify({'message': 'enpoint for testing'})
 
