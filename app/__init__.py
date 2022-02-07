@@ -46,5 +46,6 @@ def init_app():
     app.logger.info("--------------------final-configurations--------------------")
     app.logger.info(app.config)
     app.logger.info("------------------------------------------------------------")
+    app.logger.info(" set up ready, listening request...")
 
     return app

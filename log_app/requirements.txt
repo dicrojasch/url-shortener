@@ -1,8 +1,4 @@
-Flask==2.0.2
 pynamodb==5.2.0
-kazoo==2.8.0
 gmpy2==2.1.2
-validators==0.18.2
-flask-dynamo==0.1.2
 kafka-python==2.0.2
 loguru==0.6.0

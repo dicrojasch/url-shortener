@@ -55,7 +55,7 @@ class DevelopmentDockerBaseConfig(BaseConfig):
     DYNDB_TABLE_LINK = "link"
     DYNDB_TABLE_LOG = "log_internal"
     KAFKA_TOPIC = "log_topic"
-    KAFKA_HOST = "localhost"
+    KAFKA_HOST = "kafka"
     KAFKA_PORT = "9092"
     KAFKA_PARTITION = 1
     KAFKA_REP_FACTOR = 1
