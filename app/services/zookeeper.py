@@ -1,3 +1,5 @@
+import time
+
 from kazoo.client import KazooState
 from kazoo.client import KazooClient
 from kazoo.exceptions import BadVersionError
@@ -46,13 +48,15 @@ class ZookeeperURL:
                 self.zk.set(path, int_to_bytes(value_to_update), stat.version)
                 ok_set = True
             except BadVersionError as e:
-                print('Bad version error, trying to set again...')
+                print(str(e) + ' - Bad version error, trying to set again...')
+                self.zk.restart()
 
             if ok_set:
                 break
 
         if not ok_set:
-            print('Tryings to set Zookeeper exceed Max_tryings="' + constants.MAX_RETRY_WRITE_ZK + '", Path="' + path + '", Value="' + value_to_update + '"')
+            print('Tryings to set Zookeeper exceed Max_tryings="' + str(constants.MAX_RETRY_WRITE_ZK) + '", Path="' +
+                  path + '", Value="' + str(value_to_update) + '"')
             value_to_update = -1
 
         return value_to_update
