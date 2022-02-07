@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 
+from app.services.kafka import Producer, create_topic
 from app.services.models import URLShortener
 from app.services.zookeeper import ZookeeperURL
 from app.settings.logging import set_logging
@@ -8,7 +9,7 @@ from app.settings.settings import BaseConfig, get_config_class_env
 from app.utils import constants
 
 
-def create_app():
+def init_app():
     app = Flask(__name__)
     env = app.config["ENV"]
     app.config.from_object(BaseConfig)
@@ -26,9 +27,20 @@ def create_app():
     zk_url.zk.stop()
     app.logger.info("------------------------------------------------------------")
     app.logger.info("-------------------------set-db-----------------------------")
+    table_name = app.config["DYNDB_TABLE_LINK"]
+    app.logger.info("creating dynamodb table '" + table_name + "':")
     if not URLShortener.exists():
-        app.logger.info("User Table does not exist, creating one...")
+        app.logger.info("'" + table_name + "' Table does not exist, creating one...")
         URLShortener.create_table(read_capacity_units=1, write_capacity_units=1, wait=True)
+    app.logger.info("------------------------------------------------------------")
+
+    app.logger.info("-------------------------kafka-conf-------------------------")
+    topic = app.config["KAFKA_TOPIC"]
+    host = app.config["KAFKA_HOST"]
+    port = app.config["KAFKA_PORT"]
+    num_partitions = app.config["KAFKA_PARTITION"]
+    replication_factor = app.config["KAFKA_REP_FACTOR"]
+    create_topic(topic, host, port, num_partitions, replication_factor)
     app.logger.info("------------------------------------------------------------")
 
     app.logger.info("--------------------final-configurations--------------------")

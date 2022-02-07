@@ -3,17 +3,19 @@ from datetime import datetime
 from flask import Flask, redirect, request, abort, jsonify
 from app.services.models import URLShortener
 from app.services.zookeeper import ZookeeperURL
-from app import create_app
+from app import init_app, Producer
 import validators
 from app.utils.utils import get_current_link
+from app.utils import constants
 
-
-app = create_app()
+app = init_app()
 
 
 @app.route("/<short_link>", methods=['GET'])
 def get_large_link(short_link):
     stored_link = URLShortener.get(short_link)
+    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
+    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_GET, short_link, stored_link, constants.CLIENT_FREE)
     return redirect(stored_link.long_link, code=302)
 
 
@@ -32,6 +34,10 @@ def get_short_link():
 
     link = URLShortener(index_link=short_link, long_link=link, creation_date=datetime.now())
     link.save()
+
+    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
+    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_SAVE, short_link, link.long_link, constants.CLIENT_FREE)
+
     response = {'short-link': request.url_root + short_link}
     return jsonify(response)
 
@@ -40,6 +46,10 @@ def get_short_link():
 def delete_link(short_link):
     stored_link = URLShortener.get(short_link)
     stored_link.delete()
+
+    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
+    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_DEL, short_link, "-", constants.CLIENT_FREE)
+
     response = {'message': 'success'}
     return jsonify(response)
 

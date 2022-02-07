@@ -11,10 +11,20 @@ class BaseConfig(object):
 
 class ProductionBaseConfig(BaseConfig):
     """Uses production database server."""
-    ZK_HOST = "127.0.0.1"
+    ZK_HOST = "zookeeper"
     ZK_PORT = "2181"
-    DYNDB_HOST = "127.0.0.1"
+    DYNDB_HOST = "dynamodb-local"
     DYNDB_PORT = "8000"
+    DYNDB_KEY = "anything"
+    DYNDB_SECRET = "fake"
+    REGION = 'us-west-1'
+    DYNDB_TABLE_LINK = "link"
+    DYNDB_TABLE_LOG = "log_internal"
+    KAFKA_TOPIC = "log_topic"
+    KAFKA_HOST = "localhost"
+    KAFKA_PORT = "9092"
+    KAFKA_PARTITION = 1
+    KAFKA_REP_FACTOR = 1
 
 
 class DevelopmentLocalBaseConfig(BaseConfig):
@@ -27,6 +37,11 @@ class DevelopmentLocalBaseConfig(BaseConfig):
     REGION = 'us-west-1'
     DYNDB_TABLE_LINK = "link"
     DYNDB_TABLE_LOG = "log_internal"
+    KAFKA_TOPIC = "log_topic"
+    KAFKA_HOST = "localhost"
+    KAFKA_PORT = "9092"
+    KAFKA_PARTITION = 1
+    KAFKA_REP_FACTOR = 1
 
 
 class DevelopmentDockerBaseConfig(BaseConfig):
@@ -39,6 +54,11 @@ class DevelopmentDockerBaseConfig(BaseConfig):
     REGION = 'us-west-1'
     DYNDB_TABLE_LINK = "link"
     DYNDB_TABLE_LOG = "log_internal"
+    KAFKA_TOPIC = "log_topic"
+    KAFKA_HOST = "localhost"
+    KAFKA_PORT = "9092"
+    KAFKA_PARTITION = 1
+    KAFKA_REP_FACTOR = 1
 
 
 def get_config_class_env():
