@@ -55,9 +55,9 @@ The 'log_internal' table contains the Logs of the links-url operations, consists
 
 ## Demo architecture
 
-![Demo](img/demo.jpg)
+![Demo](img/demo.png)
 
 ## Scaled architecture
 
-![high_scale_approach](img/proposal.jpg)
+![high_scale_approach](img/scaled_design.png)
  
