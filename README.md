@@ -21,7 +21,7 @@ These applications are orchestrated by docker-compose. This system run three dif
 
 ## Endpoints:
 ### Get an URL save
-- URL -> http://localhost:5000/<code>
+- URL -> http://localhost:5000/<code\>
 - METHOD -> GET
 - PARAMS -> Required: code=[String]]
 - SUCCESS RESPONSE -> redirection to URL corresponding to \<code\>
@@ -37,12 +37,14 @@ These applications are orchestrated by docker-compose. This system run three dif
 - SAMPLE CALL -> http://localhost:5000/api/v1/create  (with the corresponding payload {link: <link-url>)  
   
 ### Delete an URL
-- URL -> http://localhost:5000/api/v1/delete/<code>
+- URL -> http://localhost:5000/api/v1/delete/<code\>
 - METHOD -> DELETE
 - PARAMS -> Required: code=[String]]
 - SUCCESS RESPONSE -> JSON element the message of success
 - ERROR RESPONSE ->  204 Error if not content found, 500 if internal error
-- SAMPLE CALL -> http://localhost:5000/api/v1/delete/3bj7   
+- SAMPLE CALL -> http://localhost:5000/api/v1/delete/3bj7 
+  
+**For cloud deploy testing, change url http://localhost:5000 for https://239m52oz3g.execute-api.us-east-1.amazonaws.com**
    
 ## Data Model
 The database model consist in two tables:
