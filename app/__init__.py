@@ -14,6 +14,7 @@ def init_app():
     env = app.config["ENV"]
     app.config.from_object(BaseConfig)
     app.config.from_object(get_config_class_env())
+    app.config[constants.DEPLOY_TYPE] = os.environ.get(constants.DEPLOY_TYPE)
     app.secret_key = os.urandom(12)
     set_logging()
     app.logger.info("-------------set-zookeeper-for-coordination----------------")

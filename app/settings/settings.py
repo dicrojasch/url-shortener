@@ -21,10 +21,11 @@ class ProductionBaseConfig(BaseConfig):
     DYNDB_TABLE_LINK = "link"
     DYNDB_TABLE_LOG = "log_internal"
     KAFKA_TOPIC = "log_topic"
-    KAFKA_HOST = "localhost"
+    KAFKA_HOST = "kafka"
     KAFKA_PORT = "9092"
     KAFKA_PARTITION = 1
     KAFKA_REP_FACTOR = 1
+    URL_PUBLIC = "https://239m52oz3g.execute-api.us-east-1.amazonaws.com/"
 
 
 class DevelopmentLocalBaseConfig(BaseConfig):
@@ -62,7 +63,7 @@ class DevelopmentDockerBaseConfig(BaseConfig):
 
 
 def get_config_class_env():
-    env_type_deploy = os.environ.get("TYPE_DEPLOY")
+    env_type_deploy = os.environ.get(constants.DEPLOY_TYPE)
     if env_type_deploy == constants.DEVELOP_LOCAL:
         return DevelopmentLocalBaseConfig
     elif env_type_deploy == constants.DEVELOP_DOCKER:

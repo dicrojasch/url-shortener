@@ -7,8 +7,8 @@ services:
       - '5000:5000'
     environment:
       - FLASK_APP=app
-      - FLASK_ENV=development
-      - TYPE_DEPLOY=development_docker
+      - FLASK_ENV=production
+      - TYPE_DEPLOY=production
     container_name: web
     depends_on:
       kafka:

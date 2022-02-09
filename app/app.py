@@ -56,7 +56,11 @@ def get_short_link():
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_SAVE, short_link,
                          long_link, constants.CLIENT_FREE)
 
-        response = {'short-link': request.url_root + short_link, 'long-link': long_link}
+        root_url = request.url_root
+        if app.config[constants.DEPLOY_TYPE] == constants.PRODUCTION:
+            root_url = app.config["URL_PUBLIC"]
+
+        response = {'short-link': root_url + short_link, 'long-link': long_link}
 
     except Exception as e:
         msg = "An exception occurred: " + str(e)
