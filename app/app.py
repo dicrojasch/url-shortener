@@ -13,48 +13,93 @@ app = init_app()
 
 @app.route("/<short_link>", methods=['GET'])
 def get_large_link(short_link):
-    stored_link = URLShortener.get(short_link)
-    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
-    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_GET, short_link, stored_link.long_link, constants.CLIENT_FREE)
-    return redirect(stored_link.long_link, code=302)
+    response = {}
+    try:
+        stored_link = URLShortener.get(short_link)
+        app.logger.info(" obtained  long-link: ''" + stored_link.long_link + "' from short-link: '" + short_link + "'")
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_GET, short_link,
+                         stored_link.long_link, constants.CLIENT_FREE)
+
+        return redirect(stored_link.long_link, code=302)
+
+    except Exception as e:
+        msg = "An exception occurredL: " + str(e)
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_GET, short_link, msg, constants.CLIENT_FREE)
+        response = {'error': msg}
+
+    return jsonify(response)
 
 
 @app.route("/api/v1/create", methods=['POST'])
 def get_short_link():
-    link = request.form['link']
-    if not validators.url(link):
+    long_link = request.form['link']
+    if not validators.url(long_link):
         abort(500, 'URL invalid.')
 
-    zk_url = ZookeeperURL(app.config["ZK_HOST"], app.config["ZK_PORT"])
-    zk_url.zk.start()
-    number_link_obtained = zk_url.get_new_link_number(app.config["APPLICATION_ID_ZK"], app.config["FINAL_NUMBER_RANGE"])
-    zk_url.zk.stop()
+    response = {}
+    try:
+        zk_url = ZookeeperURL(app.config["ZK_HOST"], app.config["ZK_PORT"])
+        zk_url.zk.start()
+        number_link_obtained = zk_url.get_new_link_number(app.config["APPLICATION_ID_ZK"],
+                                                          app.config["FINAL_NUMBER_RANGE"])
+        zk_url.zk.stop()
 
-    short_link = get_current_link(number_link_obtained, 62)
+        short_link = get_current_link(number_link_obtained, 62)
 
-    link = URLShortener(index_link=short_link, long_link=link, creation_date=datetime.now())
-    link.save()
+        app.logger.info(" number obtained from Zookeeper: '" + str(number_link_obtained) +
+                        "' and short-link obtained: ''" + short_link + "'")
 
-    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
-    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_SAVE, short_link, link.long_link, constants.CLIENT_FREE)
+        long_link_stored = URLShortener(index_link=short_link, long_link=long_link, creation_date=datetime.now())
+        long_link_stored.save()
+        app.logger.info(" short-link: ''" + short_link + "' saved in database.")
 
-    response = {'short-link': request.url_root + short_link}
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_SAVE, short_link,
+                         long_link, constants.CLIENT_FREE)
+
+        response = {'short-link': request.url_root + short_link, 'long-link': long_link}
+
+    except Exception as e:
+        msg = "An exception occurredL: " + str(e)
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_SAVE, msg, long_link, constants.CLIENT_FREE)
+        response = {'error': msg}
+
     return jsonify(response)
 
 
 @app.route("/api/v1/delete/<short_link>", methods=['DELETE'])
 def delete_link(short_link):
-    stored_link = URLShortener.get(short_link)
-    stored_link.delete()
+    response = {}
+    try:
+        stored_link = URLShortener.get(short_link)
+        app.logger.info(" get short-link: '" + short_link + "' to delete")
+        stored_link.delete()
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_DEL, short_link, "-", constants.CLIENT_FREE)
 
-    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
-    kafka_producer.send_event(datetime.now().timestamp(), constants.EVENT_DEL, short_link, "-", constants.CLIENT_FREE)
+        response = {'message': 'success'}
+    except Exception as e:
+        msg = "An exception occurredL: " + str(e)
+        send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_DEL, short_link, msg, constants.CLIENT_FREE)
+        response = {'error': msg}
 
-    response = {'message': 'success'}
     return jsonify(response)
 
 
 @app.route("/api/v1/test")
 def test():
     return jsonify({'message': 'enpoint for testing'})
+
+
+def send_kafka_event(date_event, type_event, short_link, long_link, type_client):
+    kafka_producer = Producer(app.config["KAFKA_TOPIC"], app.config["KAFKA_HOST"], app.config["KAFKA_PORT"])
+    kafka_producer.send_event(date_event, type_event, short_link, long_link, type_client)
+    msg = " event sent to Kafka: date_event : '" + str(datetime.fromtimestamp(date_event)) + "'; type_event: '" + \
+          type_event + "'; short_link : '" + short_link + "'; long_link : '" + long_link + \
+          "'; type_client: '" + type_client + "'"
+    if type_event == constants.EVENT_ERROR:
+        app.logger.error(msg)
+    else:
+        app.logger.info(msg)
+
+
+
 
