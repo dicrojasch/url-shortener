@@ -16,14 +16,14 @@ def get_large_link(short_link):
     response = {}
     try:
         stored_link = URLShortener.get(short_link)
-        app.logger.info(" obtained  long-link: ''" + stored_link.long_link + "' from short-link: '" + short_link + "'")
+        app.logger.info(" obtained  long-link: '" + stored_link.long_link + "' from short-link: '" + short_link + "'")
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_GET, short_link,
                          stored_link.long_link, constants.CLIENT_FREE)
 
         return redirect(stored_link.long_link, code=302)
 
     except Exception as e:
-        msg = "An exception occurredL: " + str(e)
+        msg = "An exception occurred: " + str(e)
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_GET, short_link, msg, constants.CLIENT_FREE)
         response = {'error': msg}
 
@@ -59,7 +59,7 @@ def get_short_link():
         response = {'short-link': request.url_root + short_link, 'long-link': long_link}
 
     except Exception as e:
-        msg = "An exception occurredL: " + str(e)
+        msg = "An exception occurred: " + str(e)
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_SAVE, msg, long_link, constants.CLIENT_FREE)
         response = {'error': msg}
 
@@ -71,13 +71,13 @@ def delete_link(short_link):
     response = {}
     try:
         stored_link = URLShortener.get(short_link)
-        app.logger.info(" get short-link: '" + short_link + "' to delete")
+        app.logger.info(" short-link: '" + short_link + "' to delete, long-link: '" + stored_link.long_link + "'")
         stored_link.delete()
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_DEL, short_link, "-", constants.CLIENT_FREE)
 
         response = {'message': 'success'}
     except Exception as e:
-        msg = "An exception occurredL: " + str(e)
+        msg = "An exception occurred: " + str(e)
         send_kafka_event(datetime.now().timestamp(), constants.EVENT_ERROR + "_" + constants.EVENT_DEL, short_link, msg, constants.CLIENT_FREE)
         response = {'error': msg}
 
@@ -95,7 +95,7 @@ def send_kafka_event(date_event, type_event, short_link, long_link, type_client)
     msg = " event sent to Kafka: date_event : '" + str(datetime.fromtimestamp(date_event)) + "'; type_event: '" + \
           type_event + "'; short_link : '" + short_link + "'; long_link : '" + long_link + \
           "'; type_client: '" + type_client + "'"
-    if type_event == constants.EVENT_ERROR:
+    if constants.EVENT_ERROR in type_event:
         app.logger.error(msg)
     else:
         app.logger.info(msg)

@@ -1,12 +1,8 @@
-import time
-
-from kazoo.client import KazooState
 from kazoo.client import KazooClient
-from kazoo.exceptions import BadVersionError
 from kazoo.protocol.states import KeeperState
 
 from app.utils import constants
-from app.utils.utils import int_to_bytes, bytes_to_int
+from app.utils.utils import int_to_bytes
 
 
 class ZookeeperURL:
@@ -20,11 +16,15 @@ class ZookeeperURL:
             self.zk.start()
 
         if not self.zk.exists(self.main_node_zk):
-            self.zk.create(self.main_node_zk,  int_to_bytes(0))
+            self.zk.Counter(self.main_node_zk)
 
         first_number_range, last_number_range = self._apart_range(self.main_node_zk, constants.RANGE_CAPACITY)
+
         application_node_zk = self.main_node_zk + str(first_number_range)
-        self.zk.create(application_node_zk, int_to_bytes(first_number_range))
+        counter = self.zk.Counter(application_node_zk)
+        difference = first_number_range - counter.value
+        counter += difference
+        first_number_range = counter.value
         return first_number_range
 
     def get_new_link_number(self, application_node_zk, last_number_link):
