@@ -30,7 +30,7 @@ class Consumer(threading.Thread):
                                        auto_offset_reset=self.offset_reset,
                                        consumer_timeout_ms=self.timeout)
         consumer_kafka.subscribe([self.topic])
-        logger.info("Kafka consume started, listening...")
+        logger.info("Kafka consumer started, listening...")
         while not self.stop_event.is_set():
             for message in consumer_kafka:
                 if message:

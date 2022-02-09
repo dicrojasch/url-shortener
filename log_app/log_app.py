@@ -29,7 +29,7 @@ port = config["KAFKA_PORT"]
 auto_offset_reset = config["KAFKA_OFFSET_RESET"]
 consumer_timeout = config["KAFKA_TIMEOUT"]
 
-logger.info("Starting kafka consume...")
+logger.info("Starting kafka consumer...")
 consumer = Consumer(topic, host, port, auto_offset_reset, consumer_timeout, save_log)
 consumer.run()
 

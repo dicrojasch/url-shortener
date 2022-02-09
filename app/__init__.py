@@ -23,7 +23,7 @@ def init_app():
     app.config["START_NUMBER_RANGE"] = zk_url.get_range()
     app.config["FINAL_NUMBER_RANGE"] = app.config["START_NUMBER_RANGE"] + constants.RANGE_CAPACITY
     app.config["APPLICATION_ID_ZK"] = app.config["START_NUMBER_RANGE"]
-    app.logger.info(" the range obtained for assignments is [" + str(app.config["START_NUMBER_RANGE"] - constants.RANGE_CAPACITY) + " - " + str(app.config["START_NUMBER_RANGE"]) + "]")
+    app.logger.info(" the range obtained for assignments is [" + str(app.config["START_NUMBER_RANGE"]) + " - " + str(app.config["FINAL_NUMBER_RANGE"]) + "]")
     zk_url.zk.stop()
     app.logger.info("------------------------------------------------------------")
     app.logger.info("-------------------------set-db-----------------------------")
